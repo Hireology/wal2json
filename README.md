@@ -9,15 +9,22 @@ Introduction
 
 **format version 2** produces a JSON object per tuple. Optional JSON object for beginning and end of transaction. Also, there are a variety of options to include properties.
 
-Requirements
-============
-
-* PostgreSQL 9.4+
-
 Build and Install
 =================
 
-This extension is supported on [those platforms](http://www.postgresql.org/docs/current/static/supported-platforms.html) that PostgreSQL is. The installation steps depend on your operating system.
+This extension is supported on [those platforms](http://www.postgresql.org/docs/current/static/supported-platforms.html) that PostgreSQL is. The installation steps depend on your operating system. [PostgreSQL yum repository](https://yum.postgresql.org) and [PostgreSQL apt repository](https://wiki.postgresql.org/wiki/Apt) provide wal2json packages.
+
+In Red Hat/CentOS:
+
+```
+$ sudo yum install wal2json13
+```
+
+In Debian/Ubuntu:
+
+```
+$ sudo apt-get install postgresql-13-wal2json
+```
 
 You can also keep up with the latest fixes and features cloning the Git repository.
 
@@ -28,15 +35,38 @@ $ git clone https://github.com/eulerto/wal2json.git
 Unix based Operating Systems
 ----------------------------
 
-Before use this extension, you should build it and load it at the desirable database.
+Before installing **wal2json**, you should have PostgreSQL 9.4+ installed (including the header files). If PostgreSQL is not in your search path, add it. If you are using [PostgreSQL yum repository](https://yum.postgresql.org), install `postgresql13-devel` and add `/usr/pgsql-13/bin` to your search path (yum uses `13, 12, 11, 10, 96 or 95`). If you are using [PostgreSQL apt repository](https://wiki.postgresql.org/wiki/Apt), install `postgresql-server-dev-13` and add `/usr/lib/postgresql/13/bin` to your search path. (apt uses `13, 12, 11, 10, 9.6 or 9.5`).
+
+If you compile PostgreSQL by yourself and install it in `/home/euler/pg13`:
 
 ```
-$ git clone https://github.com/eulerto/wal2json.git
-$ cd wal2json
-# Make sure your path includes the bin directory that contains the correct `pg_config`
-$ PATH=/path/to/pg/bin:$PATH
-$ USE_PGXS=1 make
-$ USE_PGXS=1 make install
+$ tar -zxf wal2json-wal2json_2_3.tar.gz
+$ cd wal2json-wal2json_2_3
+$ export PATH=/home/euler/pg13/bin:$PATH
+$ make
+$ make install
+```
+
+If you are using [PostgreSQL yum repository](https://yum.postgresql.org):
+
+```
+$ sudo yum install postgresql13-devel
+$ tar -zxf wal2json-wal2json_2_3.tar.gz
+$ cd wal2json-wal2json_2_3
+$ export PATH=/usr/pgsql-13/bin:$PATH
+$ make
+$ make install
+```
+
+If you are using [PostgreSQL apt repository](https://wiki.postgresql.org/wiki/Apt):
+
+```
+$ sudo apt-get install postgresql-server-dev-13
+$ tar -zxf wal2json-wal2json_2_3.tar.gz
+$ cd wal2json-wal2json_2_3
+$ export PATH=/usr/lib/postgresql/13/bin:$PATH
+$ make
+$ make install
 ```
 
 Windows
@@ -54,12 +84,15 @@ You need to set up at least two parameters at postgresql.conf:
 
 ```
 wal_level = logical
+#
+# these parameters only need to set in versions 9.4, 9.5 and 9.6
+# default values are ok in version 10 or later
+#
 max_replication_slots = 10
+max_wal_senders = 10
 ```
 
 After changing these parameters, a restart is needed.
-
-By default, PostgreSQL 10 or later doesn't need to adjust parameters.
 
 Parameters
 ----------
@@ -71,7 +104,10 @@ Parameters
 * `include-typmod`: add modifier to types that have it (eg. varchar(20) instead of varchar). Default is _true_.
 * `include-type-oids`: add type oids. Default is _false_.
 * `include-domain-data-type`: replace domain name with the underlying data type. Default is _false_.
+* `include-column-positions`: add column position (_pg_attribute.attnum_). Default is _false_.
 * `include-not-null`: add _not null_ information as _columnoptionals_. Default is _false_.
+* `include-default`: add default expression. Default is _false_.
+* `include-pk`: add _primary key_ information as _pk_. Column name and data type is included. Default is _false_.
 * `pretty-print`: add spaces and indentation to JSON structures. Default is _false_.
 * `write-in-chunks`: write after every change instead of every changeset. Default is _false_.
 * `include-lsn`: add _nextlsn_ to each changeset. Default is _false_.
