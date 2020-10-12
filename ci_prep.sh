@@ -7,6 +7,6 @@ sudo USE_PGXS=1 PG_CONFIG=/usr/lib/postgresql/${POSTGRESQL_VERSION}/bin/pg_confi
 
 psql -p ${POSTGRESQL_PORT} -c "alter system set wal_level = 'logical'"
 psql -p ${POSTGRESQL_PORT} -c "alter system set max_replication_slots = 1"
-echo $PGDATA
+systemctl list-units --type=service --state=active | grep -i post
 sudo pg_ctl restart
 
